@@ -7,18 +7,12 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      },
-      "env": {
-        "EXPO_NO_DOCTOR": "1"
-      }
+      "android": { "buildType": "apk" },
+      "env": { "EXPO_NO_DOCTOR": "1" }
     },
     "production": {
       "distribution": "store",
-      "android": {
-        "buildType": "app-bundle"
-      }
+      "android": { "buildType": "app-bundle" }
     }
   }
 }
