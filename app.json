@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "hebrekids",
+    "name": "HébreKids",
     "slug": "hebrekids",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,6 +15,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.doctorimara.hebrekids",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
