@@ -11,6 +11,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~55.0.25",
+    "expo-asset": "~55.0.17",
     "expo-audio": "~55.0.14",
     "expo-haptics": "~55.0.14",
     "expo-sqlite": "~55.0.16",
