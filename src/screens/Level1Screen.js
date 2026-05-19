@@ -1,7 +1,7 @@
 // src/screens/Level1Screen.js — Nivel 1: ¡Atrapa la letra!
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Alert } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence, withRepeat, runOnJS, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, withSequence, withRepeat, runOnJS } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { ALEF_BET, COLORES_BURBUJA } from '../data/gameData';
 import { actualizarNivel } from '../services/storage';
@@ -16,11 +16,11 @@ const Burbuja = ({ letra, color, posX, esCertera, index, onPresionar, activa }) 
 
   useEffect(() => {
     if (!activa) return;
-    posY.value = withTiming(H+120, { duration:4500+index*500, easing:Easing.linear });
-    rot.value  = withRepeat(withSequence(
-      withTiming(8,  {duration:1200,easing:Easing.inOut(Easing.sine)}),
-      withTiming(-8, {duration:1200,easing:Easing.inOut(Easing.sine)})
-    ),-1,true);
+    posY.value = withTiming(H+120, { duration:4500+index*500 });
+    rot.value = withRepeat(withSequence(
+      withTiming(8,  { duration:1200 }),
+      withTiming(-8, { duration:1200 })
+    ), -1, true);
   }, [activa]);
 
   const estiloAnim = useAnimatedStyle(() => ({
@@ -53,7 +53,8 @@ const Particula = ({ x, y, color, index }) => {
     const ang=(index/12)*Math.PI*2;
     tx.value=withTiming(Math.cos(ang)*90,{duration:700});
     ty.value=withTiming(Math.sin(ang)*90+160,{duration:700});
-    opa.value=withTiming(0,{duration:600}); esc.value=withTiming(0,{duration:600});
+    opa.value=withTiming(0,{duration:600});
+    esc.value=withTiming(0,{duration:600});
   },[]);
   const estilo=useAnimatedStyle(()=>({position:'absolute',left:x,top:y,transform:[{translateX:tx.value},{translateY:ty.value},{scale:esc.value}],opacity:opa.value}));
   return <Animated.View style={[{width:10,height:10,borderRadius:3,backgroundColor:color},estilo]}/>;
@@ -64,7 +65,7 @@ const FeedbackFloat = ({ texto, color, visible }) => {
   useEffect(()=>{
     if(visible){
       opa.value=withSequence(withTiming(1,{duration:150}),withTiming(1,{duration:500}),withTiming(0,{duration:300}));
-      posY.value=withTiming(-70,{duration:950,easing:Easing.out(Easing.quad)});
+      posY.value=withTiming(-70,{duration:950});
     } else { opa.value=0; posY.value=0; }
   },[visible,texto]);
   const estilo=useAnimatedStyle(()=>({opacity:opa.value,transform:[{translateY:posY.value}]}));
@@ -139,7 +140,6 @@ export default function Level1Screen({ navigation }) {
           <Text style={styles.puntosValor}>{puntos}</Text>
         </View>
       </View>
-
       <View style={styles.objetivoWrap}>
         <Text style={styles.objetivoLabel}>¡Buscá esta letra!</Text>
         {letraActual && (
@@ -149,7 +149,6 @@ export default function Level1Screen({ navigation }) {
           </Animated.View>
         )}
       </View>
-
       <View style={styles.areaJuego} pointerEvents="box-none">
         {burbujas.map(b=>(
           <Burbuja key={b.id} letra={b.letra} color={b.color} posX={b.posX}

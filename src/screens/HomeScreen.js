@@ -1,7 +1,7 @@
 // src/screens/HomeScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, SafeAreaView } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withSequence, withTiming, Easing } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { cargarEstadoInicial, registrarSesionHoy } from '../services/storage';
 import { NIVELES_DATA } from '../data/gameData';
 
@@ -45,15 +45,15 @@ export default function HomeScreen({ navigation }) {
     cargarEstadoInicial().then(e => { setEstado(e); setRacha(e.racha.diasConsecutivos); });
     registrarSesionHoy().then(r => setRacha(r.diasConsecutivos));
     flotacion.value = withRepeat(withSequence(
-      withTiming(-12,{duration:1800,easing:Easing.inOut(Easing.sine)}),
-      withTiming(0,  {duration:1800,easing:Easing.inOut(Easing.sine)})
-    ),-1,true);
+      withTiming(-12, { duration:1800 }),
+      withTiming(0,   { duration:1800 })
+    ), -1, true);
     pulsoBoton.value = withRepeat(withSequence(
-      withSpring(1.05,{damping:4}), withSpring(1.0,{damping:4})
-    ),-1,true);
+      withSpring(1.05, { damping:4 }),
+      withSpring(1.0,  { damping:4 })
+    ), -1, true);
   }, []);
 
-  // Refrescar al volver de un nivel
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       cargarEstadoInicial().then(e => { setEstado(e); setRacha(e.racha.diasConsecutivos); });
