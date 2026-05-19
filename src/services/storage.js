@@ -9,16 +9,16 @@ const CLAVES = {
 };
 
 const PROGRESO_INICIAL = {
-  nivel1: { desbloqueado: true,  completado: false, estrellas: 0, puntos: 0 },
-  nivel2: { desbloqueado: false, completado: false, estrellas: 0, puntos: 0 },
-  nivel3: { desbloqueado: false, completado: false, estrellas: 0, puntos: 0 },
-  nivel4: { desbloqueado: false, completado: false, estrellas: 0, puntos: 0 },
+  nivel1: { desbloqueado: true, completado: false, estrellas: 0, puntos: 0 },
+  nivel2: { desbloqueado: true, completado: false, estrellas: 0, puntos: 0 },
+  nivel3: { desbloqueado: true, completado: false, estrellas: 0, puntos: 0 },
+  nivel4: { desbloqueado: true, completado: false, estrellas: 0, puntos: 0 },
   puntosTotal: 0,
 };
 
-const RACHA_INICIAL    = { diasConsecutivos: 0, ultimoDia: null, rachaMaxima: 0 };
-const MASCOTA_INICIAL  = { nivel: 1, nombre: 'Kochav', xp: 0 };
-const CONFIG_INICIAL   = { volumenMusica: 0.35, volumenSFX: 0.9, haptics: true };
+const RACHA_INICIAL   = { diasConsecutivos: 0, ultimoDia: null, rachaMaxima: 0 };
+const MASCOTA_INICIAL = { nivel: 1, nombre: 'Kochav', xp: 0 };
+const CONFIG_INICIAL  = { volumenMusica: 0.35, volumenSFX: 0.9, haptics: true };
 
 const leer = async (clave, def) => {
   try {
@@ -42,8 +42,6 @@ export const actualizarNivel = async (nivelKey, datos) => {
     estrellas: Math.max(p[nivelKey].estrellas, datos.estrellas || 0),
   };
   p.puntosTotal = ['nivel1','nivel2','nivel3','nivel4'].reduce((a,k) => a + (p[k].puntos||0), 0);
-  const sig = { nivel1:'nivel2', nivel2:'nivel3', nivel3:'nivel4' };
-  if (datos.completado && sig[nivelKey]) p[sig[nivelKey]].desbloqueado = true;
   await guardar(CLAVES.PROGRESO, p);
   return p;
 };

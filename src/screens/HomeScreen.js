@@ -1,34 +1,33 @@
 // src/screens/HomeScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, SafeAreaView, Platform, StatusBar } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
 import { cargarEstadoInicial, registrarSesionHoy } from '../services/storage';
 import { NIVELES_DATA } from '../data/gameData';
 
 const { width: W } = Dimensions.get('window');
+const STATUS_H = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 0;
 
 const TarjetaNivel = ({ nivel, desbloqueado, estrellas, onPress }) => {
   const escala = useSharedValue(1);
   const estiloAnim = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
 
   const manejarPress = () => {
-    if (!desbloqueado) return;
     escala.value = withSequence(withSpring(0.93,{damping:6}), withSpring(1.0,{damping:8}));
     setTimeout(() => onPress(nivel), 150);
   };
 
   return (
-    <Animated.View style={[styles.tarjeta, !desbloqueado && styles.tarjetaBloqueada, estiloAnim]}>
+    <Animated.View style={[styles.tarjeta, estiloAnim]}>
       <TouchableOpacity onPress={manejarPress} activeOpacity={0.9} style={styles.tarjetaTouch}>
-        {!desbloqueado && <Text style={styles.candado}>🔒</Text>}
         <Text style={styles.tarjetaIcono}>{nivel.icono}</Text>
         <Text style={styles.tarjetaNombre}>{nivel.nombre}</Text>
         <Text style={styles.tarjetaHebreo}>{nivel.hebreo}</Text>
         <View style={styles.estrellasRow}>
-          {[1,2,3].map(i => <Text key={i} style={{fontSize:14, opacity: i<=estrellas?1:0.25}}>⭐</Text>)}
+          {[1,2,3].map(i => <Text key={i} style={{fontSize:14,opacity:i<=estrellas?1:0.25}}>⭐</Text>)}
         </View>
         <View style={styles.barraWrap}>
-          <View style={[styles.barraFill, { width:`${(estrellas/3)*100}%`, backgroundColor:nivel.color }]} />
+          <View style={[styles.barraFill,{width:`${(estrellas/3)*100}%`,backgroundColor:nivel.color}]}/>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -37,7 +36,7 @@ const TarjetaNivel = ({ nivel, desbloqueado, estrellas, onPress }) => {
 
 export default function HomeScreen({ navigation }) {
   const [estado, setEstado] = useState(null);
-  const [racha, setRacha]   = useState(0);
+  const [racha,  setRacha]  = useState(0);
   const flotacion  = useSharedValue(0);
   const pulsoBoton = useSharedValue(1);
 
@@ -45,38 +44,34 @@ export default function HomeScreen({ navigation }) {
     cargarEstadoInicial().then(e => { setEstado(e); setRacha(e.racha.diasConsecutivos); });
     registrarSesionHoy().then(r => setRacha(r.diasConsecutivos));
     flotacion.value = withRepeat(withSequence(
-      withTiming(-12, { duration:1800 }),
-      withTiming(0,   { duration:1800 })
-    ), -1, true);
+      withTiming(-10,{duration:1800}), withTiming(0,{duration:1800})
+    ),-1,true);
     pulsoBoton.value = withRepeat(withSequence(
-      withSpring(1.05, { damping:4 }),
-      withSpring(1.0,  { damping:4 })
-    ), -1, true);
+      withSpring(1.04,{damping:4}), withSpring(1.0,{damping:4})
+    ),-1,true);
   }, []);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsub = navigation.addListener('focus', () => {
       cargarEstadoInicial().then(e => { setEstado(e); setRacha(e.racha.diasConsecutivos); });
     });
-    return unsubscribe;
+    return unsub;
   }, [navigation]);
 
   const estiloMascota = useAnimatedStyle(() => ({ transform:[{translateY:flotacion.value}] }));
   const estiloBoton   = useAnimatedStyle(() => ({ transform:[{scale:pulsoBoton.value}] }));
 
   const getNivelProg = (id) => {
-    if (!estado) return { desbloqueado: id===1, estrellas:0 };
-    return estado.progreso[`nivel${id}`] || { desbloqueado:false, estrellas:0 };
+    if (!estado) return { desbloqueado:true, estrellas:0 };
+    return estado.progreso[`nivel${id}`] || { desbloqueado:true, estrellas:0 };
   };
 
-  const nivelActivo = NIVELES_DATA.find(n => {
-    const p = getNivelProg(n.id);
-    return p.desbloqueado && !p.completado;
-  }) || NIVELES_DATA[0];
-
   return (
-    <SafeAreaView style={styles.contenedor}>
+    <View style={styles.contenedor}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+
+        {/* Espacio para la barra de estado */}
+        <View style={{height: STATUS_H + 8}}/>
 
         <View style={styles.hud}>
           <View style={styles.rachaBadge}>
@@ -99,10 +94,9 @@ export default function HomeScreen({ navigation }) {
 
         <Animated.View style={[styles.mascotaWrap, estiloMascota]}>
           <View style={styles.bocadillo}>
-            <Text style={styles.bocadilloTexto}>¡Hola! Hoy jugamos{'\n'}{nivelActivo.nombre} {nivelActivo.icono}</Text>
+            <Text style={styles.bocadilloTexto}>¡Hola! ¿Listo para{'\n'}aprender hebreo? 🎉</Text>
           </View>
           <Text style={styles.mascotaCara}>🦊</Text>
-          <View style={styles.mascotaSombra}/>
         </Animated.View>
 
         <Text style={styles.seccionTitulo}>🗺️ Tu camino</Text>
@@ -123,34 +117,34 @@ export default function HomeScreen({ navigation }) {
 
         <Animated.View style={estiloBoton}>
           <TouchableOpacity style={styles.botonJugar} activeOpacity={0.9}
-            onPress={() => navigation.navigate(nivelActivo.screen)}>
+            onPress={() => navigation.navigate('Level1')}>
             <Text style={styles.botonJugarTexto}>▶ ¡JUGAR AHORA!</Text>
             <Text style={styles.botonJugarSub}>
-              {racha>0 ? `¡Tu racha de ${racha} días te espera! 🔥` : '¡Empezá tu aventura! 🚀'}
+              {racha>0?`¡Tu racha de ${racha} días te espera! 🔥`:'¡Empezá tu aventura! 🚀'}
             </Text>
           </TouchableOpacity>
         </Animated.View>
 
         <View style={styles.navInferior}>
           {[{icono:'🏠',label:'Inicio',activo:true},{icono:'🗺️',label:'Mapa'},{icono:'🐾',label:'Mascota'},{icono:'🏆',label:'Logros'}].map(item=>(
-            <TouchableOpacity key={item.label} style={styles.navItem}>
+            <View key={item.label} style={styles.navItem}>
               <Text style={styles.navIcono}>{item.icono}</Text>
-              <Text style={[styles.navLabel, item.activo&&styles.navLabelActivo]}>{item.label}</Text>
-            </TouchableOpacity>
+              <Text style={[styles.navLabel,item.activo&&styles.navLabelActivo]}>{item.label}</Text>
+            </View>
           ))}
         </View>
 
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   contenedor:{flex:1,backgroundColor:'#1a1060'},
   scroll:{paddingBottom:20},
-  hud:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:20,paddingTop:16,paddingBottom:8},
+  hud:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:20,paddingBottom:8},
   rachaBadge:{flexDirection:'row',alignItems:'center',backgroundColor:'rgba(255,200,0,0.2)',borderRadius:20,paddingHorizontal:12,paddingVertical:6,gap:4,borderWidth:1,borderColor:'rgba(255,200,0,0.4)'},
-  rachaIcono:{fontSize:18}, rachaNum:{color:'#FFE566',fontSize:16,fontWeight:'900'}, rachaLabel:{color:'rgba(255,230,100,0.8)',fontSize:11,fontWeight:'700'},
+  rachaIcono:{fontSize:18},rachaNum:{color:'#FFE566',fontSize:16,fontWeight:'900'},rachaLabel:{color:'rgba(255,230,100,0.8)',fontSize:11,fontWeight:'700'},
   puntosBadge:{flexDirection:'row',alignItems:'center',gap:4},
   puntosNum:{color:'#FFE566',fontSize:16,fontWeight:'900'},
   gemasBadge:{flexDirection:'row',alignItems:'center',backgroundColor:'rgba(155,93,229,0.3)',borderRadius:20,paddingHorizontal:12,paddingVertical:6,gap:4,borderWidth:1,borderColor:'rgba(155,93,229,0.5)'},
@@ -161,14 +155,11 @@ const styles = StyleSheet.create({
   bocadillo:{backgroundColor:'rgba(255,255,255,0.95)',borderRadius:16,padding:10,marginBottom:8,maxWidth:200},
   bocadilloTexto:{color:'#2d1b8c',fontSize:13,fontWeight:'700',textAlign:'center',lineHeight:18},
   mascotaCara:{fontSize:80},
-  mascotaSombra:{width:60,height:12,backgroundColor:'rgba(155,93,229,0.3)',borderRadius:30,marginTop:4},
   seccionTitulo:{color:'rgba(255,255,255,0.7)',fontSize:13,fontWeight:'800',letterSpacing:2,textTransform:'uppercase',paddingHorizontal:20,marginTop:8,marginBottom:10},
   grid:{flexDirection:'row',flexWrap:'wrap',paddingHorizontal:12,gap:10,justifyContent:'center'},
   tarjeta:{width:(W-44)/2,backgroundColor:'rgba(255,255,255,0.1)',borderRadius:18,borderWidth:1.5,borderColor:'rgba(255,255,255,0.2)',overflow:'hidden'},
-  tarjetaBloqueada:{opacity:0.45},
   tarjetaTouch:{padding:14,alignItems:'center',gap:4},
-  candado:{position:'absolute',top:10,right:10,fontSize:14},
-  tarjetaIcono:{fontSize:32}, tarjetaNombre:{color:'#fff',fontSize:14,fontWeight:'700'},
+  tarjetaIcono:{fontSize:32},tarjetaNombre:{color:'#fff',fontSize:14,fontWeight:'700'},
   tarjetaHebreo:{color:'rgba(255,255,255,0.7)',fontSize:18,fontWeight:'700',writingDirection:'rtl'},
   estrellasRow:{flexDirection:'row',gap:2},
   barraWrap:{width:'100%',height:4,backgroundColor:'rgba(255,255,255,0.15)',borderRadius:2,marginTop:4,overflow:'hidden'},
@@ -177,7 +168,7 @@ const styles = StyleSheet.create({
   botonJugarTexto:{color:'#1a1060',fontSize:22,fontWeight:'900',letterSpacing:1},
   botonJugarSub:{color:'rgba(26,16,96,0.7)',fontSize:12,fontWeight:'700',marginTop:2},
   navInferior:{flexDirection:'row',justifyContent:'space-around',paddingVertical:12,marginTop:16,borderTopWidth:1,borderTopColor:'rgba(255,255,255,0.1)',backgroundColor:'rgba(0,0,0,0.3)'},
-  navItem:{alignItems:'center',gap:3}, navIcono:{fontSize:22},
+  navItem:{alignItems:'center',gap:3},navIcono:{fontSize:22},
   navLabel:{fontSize:9,fontWeight:'800',color:'rgba(255,255,255,0.4)',letterSpacing:1,textTransform:'uppercase'},
   navLabelActivo:{color:'#FFE566'},
 });

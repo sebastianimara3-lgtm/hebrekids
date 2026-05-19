@@ -1,6 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, Text } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import HomeScreen   from './src/screens/HomeScreen';
 import Level1Screen from './src/screens/Level1Screen';
@@ -15,9 +15,10 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error) { this.setState({ error: error.message }); }
   render() {
     if (this.state.error) {
+      const { View, Text } = require('react-native');
       return (
         <View style={{flex:1,backgroundColor:'#1a1060',justifyContent:'center',alignItems:'center',padding:20}}>
-          <Text style={{color:'#FF6B6B',fontSize:18,fontWeight:'900',marginBottom:16}}>❌ Error detectado:</Text>
+          <Text style={{color:'#FF6B6B',fontSize:18,fontWeight:'900',marginBottom:16}}>❌ Error:</Text>
           <Text style={{color:'#fff',fontSize:13,textAlign:'center'}}>{this.state.error}</Text>
         </View>
       );
@@ -29,6 +30,7 @@ class ErrorBoundary extends React.Component {
 export default function App() {
   return (
     <ErrorBoundary>
+      <StatusBar style="light" />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Home"   component={HomeScreen} />
