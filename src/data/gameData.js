@@ -36,71 +36,198 @@ export const ALEF_BET = [
   { id:22, letra:'תּ', nombre:'Tav'   },
 ];
 
+// ── NIVEL 2: 40+ palabras ─────────────────────────────────────────
 export const PALABRAS = [
-  { id:1,  hebreo:'כֶּלֶב',    español:'Perro',    emoji:'🐶', categoria:'animales' },
-  { id:2,  hebreo:'חָתוּל',    español:'Gato',     emoji:'🐱', categoria:'animales' },
-  { id:3,  hebreo:'דָּג',       español:'Pez',      emoji:'🐟', categoria:'animales' },
-  { id:4,  hebreo:'צִפּוֹר',   español:'Pájaro',   emoji:'🐦', categoria:'animales' },
-  { id:5,  hebreo:'אַרְיֵה',   español:'León',     emoji:'🦁', categoria:'animales' },
-  { id:6,  hebreo:'פִּיל',     español:'Elefante', emoji:'🐘', categoria:'animales' },
-  { id:7,  hebreo:'אָדוֹם',    español:'Rojo',     emoji:'🔴', categoria:'colores'  },
-  { id:8,  hebreo:'כָּחוֹל',   español:'Azul',     emoji:'🔵', categoria:'colores'  },
-  { id:9,  hebreo:'יָרֹק',     español:'Verde',    emoji:'🟢', categoria:'colores'  },
-  { id:10, hebreo:'צָהֹב',     español:'Amarillo', emoji:'🟡', categoria:'colores'  },
-  { id:11, hebreo:'אִמָּא',    español:'Mamá',     emoji:'👩', categoria:'familia'  },
-  { id:12, hebreo:'אַבָּא',    español:'Papá',     emoji:'👨', categoria:'familia'  },
-  { id:13, hebreo:'תַּפּוּחַ', español:'Manzana',  emoji:'🍎', categoria:'comida'   },
-  { id:14, hebreo:'לֶחֶם',     español:'Pan',      emoji:'🍞', categoria:'comida'   },
-  { id:15, hebreo:'מַיִם',     español:'Agua',     emoji:'💧', categoria:'comida'   },
-  { id:16, hebreo:'חָלָב',     español:'Leche',    emoji:'🥛', categoria:'comida'   },
+  // Animales
+  { id:1,  hebreo:'כֶּלֶב',    español:'Perro',     emoji:'🐶' },
+  { id:2,  hebreo:'חָתוּל',    español:'Gato',      emoji:'🐱' },
+  { id:3,  hebreo:'דָּג',       español:'Pez',       emoji:'🐟' },
+  { id:4,  hebreo:'צִפּוֹר',   español:'Pájaro',    emoji:'🐦' },
+  { id:5,  hebreo:'אַרְיֵה',   español:'León',      emoji:'🦁' },
+  { id:6,  hebreo:'פִּיל',     español:'Elefante',  emoji:'🐘' },
+  { id:7,  hebreo:'סוּס',      español:'Caballo',   emoji:'🐴' },
+  { id:8,  hebreo:'פָּרָה',    español:'Vaca',      emoji:'🐄' },
+  { id:9,  hebreo:'כֶּבֶשׂ',   español:'Oveja',     emoji:'🐑' },
+  { id:10, hebreo:'קוֹף',      español:'Mono',      emoji:'🐒' },
+  // Colores
+  { id:11, hebreo:'אָדוֹם',    español:'Rojo',      emoji:'🔴' },
+  { id:12, hebreo:'כָּחוֹל',   español:'Azul',      emoji:'🔵' },
+  { id:13, hebreo:'יָרֹק',     español:'Verde',     emoji:'🟢' },
+  { id:14, hebreo:'צָהֹב',     español:'Amarillo',  emoji:'🟡' },
+  { id:15, hebreo:'כָּתֹם',    español:'Naranja',   emoji:'🟠' },
+  { id:16, hebreo:'סָגוֹל',    español:'Violeta',   emoji:'🟣' },
+  { id:17, hebreo:'לָבָן',     español:'Blanco',    emoji:'⬜' },
+  { id:18, hebreo:'שָׁחוֹר',   español:'Negro',     emoji:'⬛' },
+  // Familia
+  { id:19, hebreo:'אִמָּא',    español:'Mamá',      emoji:'👩' },
+  { id:20, hebreo:'אַבָּא',    español:'Papá',      emoji:'👨' },
+  { id:21, hebreo:'אָח',       español:'Hermano',   emoji:'👦' },
+  { id:22, hebreo:'אָחוֹת',    español:'Hermana',   emoji:'👧' },
+  { id:23, hebreo:'סָבָא',     español:'Abuelo',    emoji:'👴' },
+  { id:24, hebreo:'סָבְתָא',   español:'Abuela',    emoji:'👵' },
+  // Comida
+  { id:25, hebreo:'תַּפּוּחַ', español:'Manzana',   emoji:'🍎' },
+  { id:26, hebreo:'לֶחֶם',     español:'Pan',       emoji:'🍞' },
+  { id:27, hebreo:'מַיִם',     español:'Agua',      emoji:'💧' },
+  { id:28, hebreo:'חָלָב',     español:'Leche',     emoji:'🥛' },
+  { id:29, hebreo:'בֵּיצָה',   español:'Huevo',     emoji:'🥚' },
+  { id:30, hebreo:'גֶּזֶר',    español:'Zanahoria', emoji:'🥕' },
+  { id:31, hebreo:'בָּנָנָה',  español:'Banana',    emoji:'🍌' },
+  { id:32, hebreo:'עֻגָּה',    español:'Torta',     emoji:'🎂' },
+  // Cuerpo
+  { id:33, hebreo:'יָד',       español:'Mano',      emoji:'✋' },
+  { id:34, hebreo:'רֶגֶל',     español:'Pie',       emoji:'🦶' },
+  { id:35, hebreo:'עַיִן',     español:'Ojo',       emoji:'👁️' },
+  { id:36, hebreo:'אֹזֶן',     español:'Oreja',     emoji:'👂' },
+  { id:37, hebreo:'אַף',       español:'Nariz',     emoji:'👃' },
+  { id:38, hebreo:'פֶּה',      español:'Boca',      emoji:'👄' },
+  // Cosas
+  { id:39, hebreo:'בַּיִת',    español:'Casa',      emoji:'🏠' },
+  { id:40, hebreo:'עֵץ',       español:'Árbol',     emoji:'🌳' },
+  { id:41, hebreo:'שֶׁמֶשׁ',   español:'Sol',       emoji:'☀️' },
+  { id:42, hebreo:'יָרֵחַ',    español:'Luna',      emoji:'🌙' },
+  { id:43, hebreo:'כּוֹכָב',   español:'Estrella',  emoji:'⭐' },
+  { id:44, hebreo:'סֵפֶר',     español:'Libro',     emoji:'📚' },
 ];
 
+// ── NIVEL 3: Oraciones de 2 a 6 palabras, ordenadas por dificultad
 export const ORACIONES = [
-  { id:1, español:'Yo quiero agua',    palabras:['אֲנִי','רוֹצֶה','מַיִם'], emojis:['👤','🤲','💧'] },
-  { id:2, español:'Buenos días',       palabras:['בֹּקֶר','טוֹב'],          emojis:['🌅','😊']       },
-  { id:3, español:'Yo amo a mamá',     palabras:['אֲנִי','אוֹהֵב','אִמָּא'], emojis:['👤','❤️','👩'] },
-  { id:4, español:'Yo tengo hambre',   palabras:['אֲנִי','רָעֵב'],          emojis:['👤','🍽️']       },
-  { id:5, español:'Muchas gracias',    palabras:['תּוֹדָה','רַבָּה'],        emojis:['🙏','💛']       },
-  { id:6, español:'Buenas noches',     palabras:['לַיְלָה','טוֹב'],         emojis:['🌙','😴']       },
-  { id:7, español:'Por favor',         palabras:['בְּבַקָּשָׁה'],           emojis:['🙏']            },
-  { id:8, español:'Yo quiero comer',   palabras:['אֲנִי','רוֹצֶה','לֶאֱכֹל'], emojis:['👤','🤲','🍽️'] },
+  // 2 palabras
+  { id:1,  español:'Buenos días',         palabras:['בֹּקֶר','טוֹב'],                              emojis:['🌅','😊'],             dificultad:1 },
+  { id:2,  español:'Buenas noches',       palabras:['לַיְלָה','טוֹב'],                             emojis:['🌙','😴'],             dificultad:1 },
+  { id:3,  español:'Muchas gracias',      palabras:['תּוֹדָה','רַבָּה'],                            emojis:['🙏','💛'],             dificultad:1 },
+  { id:4,  español:'Por favor',           palabras:['בְּבַקָּשָׁה','תּוֹדָה'],                      emojis:['🙏','😊'],             dificultad:1 },
+  // 3 palabras
+  { id:5,  español:'Yo quiero agua',      palabras:['אֲנִי','רוֹצֶה','מַיִם'],                     emojis:['👤','🤲','💧'],        dificultad:2 },
+  { id:6,  español:'Yo amo a mamá',       palabras:['אֲנִי','אוֹהֵב','אִמָּא'],                    emojis:['👤','❤️','👩'],        dificultad:2 },
+  { id:7,  español:'Yo tengo hambre',     palabras:['אֲנִי','רָעֵב','מְאוֹד'],                     emojis:['👤','🍽️','💥'],        dificultad:2 },
+  { id:8,  español:'El gato es grande',   palabras:['הַחָתוּל','הוּא','גָּדוֹל'],                  emojis:['🐱','➡️','📏'],        dificultad:2 },
+  { id:9,  español:'La manzana es roja',  palabras:['הַתַּפּוּחַ','הוּא','אָדוֹם'],                 emojis:['🍎','➡️','🔴'],        dificultad:2 },
+  { id:10, español:'Yo quiero dormir',    palabras:['אֲנִי','רוֹצֶה','לִישֹׁן'],                   emojis:['👤','🤲','😴'],        dificultad:2 },
+  // 4 palabras
+  { id:11, español:'Yo quiero comer pan', palabras:['אֲנִי','רוֹצֶה','לֶאֱכֹל','לֶחֶם'],           emojis:['👤','🤲','🍽️','🍞'],   dificultad:3 },
+  { id:12, español:'El perro es muy grande', palabras:['הַכֶּלֶב','הוּא','גָּדוֹל','מְאוֹד'],       emojis:['🐶','➡️','📏','💥'],   dificultad:3 },
+  { id:13, español:'Yo amo a mi papá',    palabras:['אֲנִי','אוֹהֵב','אֶת','אַבָּא'],              emojis:['👤','❤️','🔗','👨'],   dificultad:3 },
+  { id:14, español:'La luna es muy linda',palabras:['הַיָּרֵחַ','הוּא','יָפֶה','מְאוֹד'],          emojis:['🌙','➡️','😍','💥'],   dificultad:3 },
+  // 5 palabras
+  { id:15, español:'Yo quiero beber leche fría', palabras:['אֲנִי','רוֹצֶה','לִשְׁתּוֹת','חָלָב','קַר'], emojis:['👤','🤲','🥤','🥛','❄️'], dificultad:4 },
+  { id:16, español:'El sol brilla en el cielo',  palabras:['הַשֶּׁמֶשׁ','זוֹרַחַת','בַּ','שָּׁמַיִם','הַיּוֹם'], emojis:['☀️','✨','🔗','🌤️','📅'], dificultad:4 },
+  // 6 palabras
+  { id:17, español:'Yo quiero jugar con mi perro', palabras:['אֲנִי','רוֹצֶה','לְשַׂחֵק','עִם','הַכֶּלֶב','שֶׁלִּי'], emojis:['👤','🤲','🎮','🤝','🐶','💛'], dificultad:5 },
+  { id:18, español:'Hoy es un día muy bueno',     palabras:['הַיּוֹם','הוּא','יוֹם','טוֹב','מְאוֹד','וְיָפֶה'],    emojis:['📅','➡️','🗓️','😊','💥','😍'], dificultad:5 },
 ];
 
-export const ESCENARIOS = [
+// ── NIVEL 4: Preguntas con 3 opciones de respuesta ───────────────
+export const PREGUNTAS = [
+  // Ronda 1: Saludos básicos
   {
-    id:1, nombre:'La Casa', emoji:'🏠', color:'#FF6B6B',
-    descripcion:'Tocá los objetos de la casa',
-    objetos:[
-      { id:'puerta',  emoji:'🚪', hebreo:'דֶּלֶת',  español:'Puerta',  x:0.45, y:0.60 },
-      { id:'ventana', emoji:'🪟', hebreo:'חַלּוֹן',  español:'Ventana', x:0.15, y:0.30 },
-      { id:'cama',    emoji:'🛏️', hebreo:'מִיטָּה',  español:'Cama',    x:0.65, y:0.55 },
-      { id:'silla',   emoji:'🪑', hebreo:'כִּסֵּא',  español:'Silla',   x:0.25, y:0.65 },
-      { id:'libro',   emoji:'📚', hebreo:'סֵפֶר',    español:'Libro',   x:0.70, y:0.25 },
-      { id:'lampara', emoji:'💡', hebreo:'מְנוֹרָה', español:'Lámpara', x:0.80, y:0.15 },
+    id: 1,
+    personaje: '🦊',
+    pregunta: 'שָׁלוֹם! מַה שִּׁמְךָ?',
+    traduccion: '¡Hola! ¿Cómo te llamás?',
+    opciones: [
+      { hebreo:'שְׁמִי פַּבְלוֹ', español:'Me llamo Pablo', correcta:true  },
+      { hebreo:'תּוֹדָה רַבָּה',  español:'Muchas gracias', correcta:false },
+      { hebreo:'לַיְלָה טוֹב',   español:'Buenas noches',  correcta:false },
     ],
   },
   {
-    id:2, nombre:'El Jardín', emoji:'🌳', color:'#06D6A0',
-    descripcion:'Tocá las cosas del jardín',
-    objetos:[
-      { id:'arbol',    emoji:'🌳', hebreo:'עֵץ',      español:'Árbol',    x:0.20, y:0.25 },
-      { id:'flor',     emoji:'🌸', hebreo:'פֶּרַח',   español:'Flor',     x:0.55, y:0.60 },
-      { id:'sol',      emoji:'☀️', hebreo:'שֶׁמֶשׁ',  español:'Sol',      x:0.75, y:0.10 },
-      { id:'nube',     emoji:'☁️', hebreo:'עָנָן',    español:'Nube',     x:0.30, y:0.10 },
-      { id:'mariposa', emoji:'🦋', hebreo:'פַּרְפַּר',español:'Mariposa', x:0.65, y:0.35 },
-      { id:'pajaro',   emoji:'🐦', hebreo:'צִפּוֹר',  español:'Pájaro',   x:0.15, y:0.50 },
+    id: 2,
+    personaje: '🐻',
+    pregunta: 'מַה שְׁלוֹמְךָ?',
+    traduccion: '¿Cómo estás?',
+    opciones: [
+      { hebreo:'אֲנִי בְּסֵדֶר',  español:'Estoy bien',     correcta:true  },
+      { hebreo:'אֲנִי רָעֵב',     español:'Tengo hambre',   correcta:false },
+      { hebreo:'אֲנִי עָיֵף',     español:'Estoy cansado',  correcta:false },
     ],
   },
   {
-    id:3, nombre:'El Mercado', emoji:'🛒', color:'#F77F00',
-    descripcion:'Tocá la comida del mercado',
-    objetos:[
-      { id:'manzana', emoji:'🍎', hebreo:'תַּפּוּחַ', español:'Manzana', x:0.20, y:0.40 },
-      { id:'pan',     emoji:'🍞', hebreo:'לֶחֶם',    español:'Pan',     x:0.50, y:0.55 },
-      { id:'uva',     emoji:'🍇', hebreo:'עֵנָב',    español:'Uva',     x:0.75, y:0.35 },
-      { id:'naranja', emoji:'🍊', hebreo:'תַּפּוּז',  español:'Naranja', x:0.35, y:0.65 },
-      { id:'leche',   emoji:'🥛', hebreo:'חָלָב',    español:'Leche',   x:0.65, y:0.65 },
-      { id:'huevo',   emoji:'🥚', hebreo:'בֵּיצָה',  español:'Huevo',   x:0.15, y:0.65 },
+    id: 3,
+    personaje: '🦁',
+    pregunta: 'כַּמָּה שָׁנִים יֵשׁ לְךָ?',
+    traduccion: '¿Cuántos años tenés?',
+    opciones: [
+      { hebreo:'יֵשׁ לִי שֶׁבַע שָׁנִים', español:'Tengo siete años',  correcta:true  },
+      { hebreo:'אֲנִי גָּדוֹל',            español:'Soy grande',         correcta:false },
+      { hebreo:'אֲנִי לֹא יוֹדֵעַ',        español:'No sé',              correcta:false },
+    ],
+  },
+  {
+    id: 4,
+    personaje: '🐸',
+    pregunta: 'אֵיפֹה אַתָּה גָּר?',
+    traduccion: '¿Dónde vivís?',
+    opciones: [
+      { hebreo:'אֲנִי גָּר בְּבַיִת', español:'Vivo en una casa',  correcta:true  },
+      { hebreo:'אֲנִי אוֹהֵב',         español:'Yo amo',            correcta:false },
+      { hebreo:'בֹּקֶר טוֹב',          español:'Buenos días',       correcta:false },
+    ],
+  },
+  {
+    id: 5,
+    personaje: '🦋',
+    pregunta: 'מָה אַתָּה אוֹהֵב לֶאֱכֹל?',
+    traduccion: '¿Qué te gusta comer?',
+    opciones: [
+      { hebreo:'אֲנִי אוֹהֵב פִּיצָּה', español:'Me gusta la pizza',   correcta:true  },
+      { hebreo:'אֲנִי שֹׁתֶה',          español:'Yo tomo',             correcta:false },
+      { hebreo:'הַבַּיִת גָּדוֹל',       español:'La casa es grande',   correcta:false },
+    ],
+  },
+  {
+    id: 6,
+    personaje: '🐼',
+    pregunta: 'אֵיזֶה צֶבַע אַתָּה אוֹהֵב?',
+    traduccion: '¿Qué color te gusta?',
+    opciones: [
+      { hebreo:'אֲנִי אוֹהֵב כָּחוֹל', español:'Me gusta el azul',    correcta:true  },
+      { hebreo:'הַחָתוּל קָטָן',         español:'El gato es pequeño', correcta:false },
+      { hebreo:'תּוֹדָה',                español:'Gracias',            correcta:false },
+    ],
+  },
+  {
+    id: 7,
+    personaje: '🦊',
+    pregunta: 'יֵשׁ לְךָ אַח אוֹ אָחוֹת?',
+    traduccion: '¿Tenés hermano o hermana?',
+    opciones: [
+      { hebreo:'כֵּן, יֵשׁ לִי אָח',    español:'Sí, tengo un hermano', correcta:true  },
+      { hebreo:'אֲנִי רוֹצֶה לִישֹׁן',  español:'Quiero dormir',        correcta:false },
+      { hebreo:'הַשֶּׁמֶשׁ יָפָה',        español:'El sol es lindo',      correcta:false },
+    ],
+  },
+  {
+    id: 8,
+    personaje: '🐻',
+    pregunta: 'מָה אַתָּה אוֹהֵב לַעֲשׂוֹת?',
+    traduccion: '¿Qué te gusta hacer?',
+    opciones: [
+      { hebreo:'אֲנִי אוֹהֵב לְשַׂחֵק', español:'Me gusta jugar',     correcta:true  },
+      { hebreo:'הַלַּיְלָה קַר',          español:'La noche es fría',   correcta:false },
+      { hebreo:'אֲנִי רָעֵב מְאוֹד',      español:'Tengo mucha hambre', correcta:false },
+    ],
+  },
+  {
+    id: 9,
+    personaje: '🦁',
+    pregunta: 'מִי הַחָבֵר שֶׁלְּךָ?',
+    traduccion: '¿Quién es tu amigo?',
+    opciones: [
+      { hebreo:'הַחָבֵר שֶׁלִּי הוּא דָּוִד', español:'Mi amigo es David',  correcta:true  },
+      { hebreo:'אֲנִי שׁוֹתֶה מַיִם',          español:'Tomo agua',          correcta:false },
+      { hebreo:'הַכֶּלֶב רָץ',                   español:'El perro corre',     correcta:false },
+    ],
+  },
+  {
+    id: 10,
+    personaje: '🐸',
+    pregunta: 'מָה הַמָּקוֹם הָאָהוּב עָלֶיךָ?',
+    traduccion: '¿Cuál es tu lugar favorito?',
+    opciones: [
+      { hebreo:'הַמָּקוֹם הָאָהוּב הוּא הַגַּן', español:'Mi lugar favorito es el jardín', correcta:true  },
+      { hebreo:'אֲנִי עָיֵף',                      español:'Estoy cansado',                 correcta:false },
+      { hebreo:'הַלֶּחֶם טָעִים',                  español:'El pan está rico',              correcta:false },
     ],
   },
 ];
