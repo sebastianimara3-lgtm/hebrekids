@@ -1,217 +1,337 @@
-// src/screens/Level1Screen.js — Nivel 1: ¡Atrapa la letra!
-// Incluye: botón reiniciar, fonética, hebreo/español
-import React,{useState,useEffect,useCallback,useRef} from 'react';
-import {View,Text,StyleSheet,TouchableOpacity,Dimensions,Alert,Platform,StatusBar} from 'react-native';
-import Animated,{useSharedValue,useAnimatedStyle,withSpring,withTiming,withSequence,withRepeat,runOnJS} from 'react-native-reanimated';
+// src/screens/Level1Screen.js — Nivel 1: ¡Encontrá la letra en la cuadrícula!
+// La letra objetivo aparece arriba. Abajo hay una cuadrícula con las 22 letras
+// desordenadas. Al tocar la correcta se marca en verde y aparece la siguiente.
+
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity,
+  Dimensions, SafeAreaView, Alert, Platform, StatusBar, ScrollView,
+} from 'react-native';
+import Animated, {
+  useSharedValue, useAnimatedStyle,
+  withSpring, withSequence, withTiming,
+} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import {ALEF_BET,COLORES_BURBUJA} from '../data/gameData';
-import {actualizarNivel} from '../services/storage';
-import {useIdioma} from '../hooks/useIdioma';
+import { ALEF_BET } from '../data/gameData';
+import { actualizarNivel } from '../services/storage';
+import { useIdioma, MODOS } from '../hooks/useIdioma';
 import BarraIdioma from '../components/BarraIdioma';
 
-const {width:W,height:H}=Dimensions.get('window');
-const SB_H=Platform.OS==='android'?(StatusBar.currentHeight||24):44;
+const { width: W } = Dimensions.get('window');
+const SB_H = Platform.OS === 'android' ? (StatusBar.currentHeight || 24) : 44;
 
-const Burbuja=({letra,fonetica,color,posX,esCertera,index,onPresionar,activa,modo})=>{
-  const posY=useSharedValue(-120),escala=useSharedValue(1),opa=useSharedValue(1),rot=useSharedValue(0);
-  useEffect(()=>{
-    if(!activa){posY.value=-120;opa.value=1;escala.value=1;return;}
-    posY.value=withTiming(H+150,{duration:5500+index*350});
-    rot.value=withRepeat(withSequence(withTiming(7,{duration:1500}),withTiming(-7,{duration:1500})),-1,true);
-  },[activa]);
-  const estiloAnim=useAnimatedStyle(()=>({transform:[{translateY:posY.value},{scale:escala.value},{rotate:`${rot.value}deg`}],opacity:opa.value}));
-  const manejarToque=useCallback(()=>{
-    if(esCertera){escala.value=withSequence(withSpring(1.6,{damping:3}),withTiming(0,{duration:200}));opa.value=withTiming(0,{duration:250});}
-    else{escala.value=withSequence(withSpring(0.8,{damping:8}),withSpring(1.1,{damping:6}),withSpring(1.0,{damping:8}));}
-    runOnJS(onPresionar)(esCertera);
-  },[esCertera]);
-  const textoMostrar = modo==='fonetica' ? fonetica : letra;
-  const esFonetica   = modo==='fonetica';
-  return(
-    <Animated.View style={[styles.burbuja,{left:posX,backgroundColor:color},estiloAnim]}>
-      <TouchableOpacity onPress={manejarToque} activeOpacity={0.85} style={styles.burbujaTouch}>
-        <Text style={esFonetica?styles.letraFonetica:styles.letraHebrea}>{textoMostrar}</Text>
+// Mezcla el array y lo devuelve nuevo
+const mezclar = arr => [...arr].sort(() => Math.random() - 0.5);
+
+// ── Celda de la cuadrícula ────────────────────────────────────────
+const CeldaLetra = ({ item, estado, onPress, modo }) => {
+  // estado: 'normal' | 'correcto' | 'incorrecto'
+  const escala = useSharedValue(1);
+  const estiloAnim = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
+
+  const manejarPress = () => {
+    escala.value = withSequence(
+      withSpring(0.85, { damping: 6 }),
+      withSpring(1.0,  { damping: 8 })
+    );
+    onPress(item);
+  };
+
+  const bgColor =
+    estado === 'correcto'   ? '#4ECDC4' :
+    estado === 'incorrecto' ? '#FF6B6B' :
+    'rgba(255,255,255,0.1)';
+
+  const borderColor =
+    estado === 'correcto'   ? '#4ECDC4' :
+    estado === 'incorrecto' ? '#FF6B6B' :
+    'rgba(255,255,255,0.2)';
+
+  const textoMostrar =
+    modo === MODOS.FONETICA ? item.fonetica :
+    modo === MODOS.ESPANOL  ? item.nombre   :
+    item.letra;
+
+  const esLatin = modo !== MODOS.HEBREO;
+
+  return (
+    <Animated.View style={[styles.celda, { backgroundColor: bgColor, borderColor }, estiloAnim]}>
+      <TouchableOpacity
+        onPress={manejarPress}
+        activeOpacity={0.8}
+        style={styles.celdaTouch}
+        disabled={estado === 'correcto'}
+      >
+        <Text style={esLatin ? styles.celdaLetraLatin : styles.celdaLetra}>
+          {textoMostrar}
+        </Text>
+        {estado === 'correcto' && <Text style={styles.celdaCheck}>✓</Text>}
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
-const Particula=({x,y,color,index})=>{
-  const tx=useSharedValue(0),ty=useSharedValue(0),opa=useSharedValue(1),esc=useSharedValue(1);
-  useEffect(()=>{const ang=(index/12)*Math.PI*2;tx.value=withTiming(Math.cos(ang)*90,{duration:650});ty.value=withTiming(Math.sin(ang)*90+150,{duration:650});opa.value=withTiming(0,{duration:580});esc.value=withTiming(0,{duration:580});},[]);
-  const estilo=useAnimatedStyle(()=>({position:'absolute',left:x,top:y,transform:[{translateX:tx.value},{translateY:ty.value},{scale:esc.value}],opacity:opa.value}));
-  return <Animated.View style={[{width:12,height:12,borderRadius:4,backgroundColor:color},estilo]}/>;
+// ── Partículas de acierto ─────────────────────────────────────────
+const Particula = ({ x, y, color, index }) => {
+  const tx = useSharedValue(0), ty = useSharedValue(0);
+  const opa = useSharedValue(1), esc = useSharedValue(1);
+  useEffect(() => {
+    const ang = (index / 10) * Math.PI * 2;
+    tx.value = withTiming(Math.cos(ang) * 60, { duration: 600 });
+    ty.value = withTiming(Math.sin(ang) * 60 + 80, { duration: 600 });
+    opa.value = withTiming(0, { duration: 550 });
+    esc.value = withTiming(0, { duration: 550 });
+  }, []);
+  const estilo = useAnimatedStyle(() => ({
+    position: 'absolute', left: x, top: y,
+    transform: [{ translateX: tx.value }, { translateY: ty.value }, { scale: esc.value }],
+    opacity: opa.value,
+  }));
+  return <Animated.View style={[{ width: 10, height: 10, borderRadius: 5, backgroundColor: color }, estilo]} />;
 };
 
-const FeedbackFloat=({texto,color,visible})=>{
-  const opa=useSharedValue(0),posY=useSharedValue(0);
-  useEffect(()=>{if(visible){opa.value=withSequence(withTiming(1,{duration:120}),withTiming(1,{duration:500}),withTiming(0,{duration:280}));posY.value=withTiming(-70,{duration:900});}else{opa.value=0;posY.value=0;}},[visible,texto]);
-  const estilo=useAnimatedStyle(()=>({opacity:opa.value,transform:[{translateY:posY.value}]}));
-  return <Animated.Text style={[styles.feedbackTexto,{color},estilo]}>{texto}</Animated.Text>;
-};
+// ── Pantalla principal ────────────────────────────────────────────
+export default function Level1Screen({ navigation }) {
+  const { modo, toggleFonetica, toggleTraduccion } = useIdioma();
 
-export default function Level1Screen({navigation}){
-  const {modo,toggleFonetica,toggleTraduccion,labelToggle}=useIdioma();
-  const [puntos,setPuntos]=useState(0),[vidas,setVidas]=useState(3);
-  const [letraActual,setLetraActual]=useState(null),[burbujas,setBurbujas]=useState([]);
-  const [particulas,setParticulas]=useState([]),[feedback,setFeedback]=useState({visible:false,texto:'',color:'#fff'});
-  const [juegoActivo,setJuegoActivo]=useState(false),[ronda,setRonda]=useState(0),[aciertos,setAciertos]=useState(0);
-  const [burbujasLlegaron,setBurbujasLlegaron]=useState(false);
-  const escalaLetra=useSharedValue(1);
-  const estiloLetra=useAnimatedStyle(()=>({transform:[{scale:escalaLetra.value}]}));
-  const timer=useRef(null);
-  useEffect(()=>()=>{if(timer.current)clearTimeout(timer.current);},[]);
+  // Cuadrícula: las 22 letras mezcladas (orden fijo por ronda)
+  const [cuadricula,    setCuadricula]    = useState([]);
+  // Estados de cada celda: { [id]: 'normal'|'correcto'|'incorrecto' }
+  const [estadosCeldas, setEstadosCeldas] = useState({});
+  // Índice de la letra objetivo dentro del Alef-Bet ordenado
+  const [idxObjetivo,   setIdxObjetivo]   = useState(0);
+  // Cuántas letras encontró en la ronda actual
+  const [encontradas,   setEncontradas]   = useState(0);
 
-  const generarRonda=useCallback(()=>{
-    const idx=Math.floor(Math.random()*ALEF_BET.length);
-    const obj=ALEF_BET[idx];
-    setLetraActual(obj);
-    setBurbujasLlegaron(false);
-    escalaLetra.value=withSequence(withSpring(1.3,{damping:4}),withSpring(1.0,{damping:8}));
-    const dist=ALEF_BET.filter((_,i)=>i!==idx).sort(()=>Math.random()-0.5).slice(0,4);
-    setBurbujas([obj,...dist].sort(()=>Math.random()-0.5).map((item,i)=>({
-      id:`${Date.now()}_${i}`,letra:item.letra,fonetica:item.fonetica,
-      esCertera:item.letra===obj.letra,
-      posX:15+(i%3)*((W-100)/2)+Math.random()*15,
-      color:COLORES_BURBUJA[i%COLORES_BURBUJA.length],index:i,
-    })));
-    setRonda(r=>r+1);
-    // Detectar si las burbujas llegaron sin ser tocadas
-    timer.current=setTimeout(()=>setBurbujasLlegaron(true), 6000);
-  },[]);
+  const [puntos,      setPuntos]      = useState(0);
+  const [errores,     setErrores]     = useState(0);
+  const [juegoActivo, setJuegoActivo] = useState(false);
+  const [particulas,  setParticulas]  = useState([]);
 
-  const manejarToque=useCallback(async(esAcierto,posX=W/2)=>{
-    if(!juegoActivo)return;
-    if(esAcierto){
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setPuntos(p=>p+10);setAciertos(a=>a+1);
-      setBurbujasLlegaron(false);
-      setFeedback({visible:true,texto:'¡Genial! +10 ✨',color:'#4ECDC4'});
-      setParticulas(Array.from({length:12},(_,i)=>({id:`p${Date.now()}${i}`,x:posX,y:H*0.38,color:COLORES_BURBUJA[i%8],index:i})));
-      timer.current=setTimeout(()=>setParticulas([]),1100);
-      timer.current=setTimeout(()=>{setFeedback(f=>({...f,visible:false}));generarRonda();},1000);
-    } else {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      setFeedback({visible:true,texto:'¡Esa no era! 😅',color:'#FF6B6B'});
-      timer.current=setTimeout(()=>setFeedback(f=>({...f,visible:false})),900);
-      timer.current=setTimeout(()=>setVidas(v=>{const nv=v-1;if(nv<=0)setTimeout(()=>finalizarJuego(),400);else generarRonda();return nv;}),2000);
-    }
-  },[juegoActivo,generarRonda]);
+  // Animación de la letra objetivo
+  const escalaObjetivo = useSharedValue(1);
+  const estiloObjetivo = useAnimatedStyle(() => ({
+    transform: [{ scale: escalaObjetivo.value }],
+  }));
 
-  const finalizarJuego=useCallback(async()=>{
-    setJuegoActivo(false);setBurbujas([]);setBurbujasLlegaron(false);
-    const estrellas=puntos>=60?3:puntos>=30?2:puntos>0?1:0;
-    await actualizarNivel('nivel1',{puntos,estrellas,completado:puntos>=30});
-    Alert.alert('¡Ronda terminada! 🎉',`Puntos: ${puntos}\nAciertos: ${aciertos}`,[
-      {text:'¡Otra vez!',onPress:iniciarJuego},{text:'Volver',onPress:()=>navigation.goBack()},
-    ]);
-  },[puntos,aciertos,navigation]);
+  // Letra objetivo actual
+  const letraObjetivo = ALEF_BET[idxObjetivo];
 
-  const iniciarJuego=()=>{setPuntos(0);setVidas(3);setAciertos(0);setRonda(0);setJuegoActivo(true);generarRonda();};
-
-  const reiniciarRonda=()=>{
-    setBurbujasLlegaron(false);
-    setVidas(v=>{const nv=v-1;if(nv<=0){finalizarJuego();return nv;}generarRonda();return nv;});
+  // ── Iniciar juego ─────────────────────────────────────────────
+  const iniciarJuego = () => {
+    const mezclada = mezclar(ALEF_BET);
+    setCuadricula(mezclada);
+    setEstadosCeldas(Object.fromEntries(ALEF_BET.map(l => [l.id, 'normal'])));
+    setIdxObjetivo(0);
+    setEncontradas(0);
+    setPuntos(0);
+    setErrores(0);
+    setJuegoActivo(true);
   };
 
-  // Texto del objetivo según modo
-  const textoObjetivo = modo==='fonetica' ? letraActual?.fonetica
-    : modo==='espanol' ? letraActual?.nombre
-    : letraActual?.letra;
+  // ── Al tocar una celda ────────────────────────────────────────
+  const manejarToque = useCallback(async (item) => {
+    if (!juegoActivo) return;
+    if (estadosCeldas[item.id] === 'correcto') return;
 
-  return(
+    if (item.letra === letraObjetivo.letra) {
+      // ¡ACIERTO!
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+      // Marcar celda como correcta
+      setEstadosCeldas(prev => ({ ...prev, [item.id]: 'correcto' }));
+
+      // Animación del objetivo
+      escalaObjetivo.value = withSequence(
+        withSpring(1.3, { damping: 4 }),
+        withSpring(1.0, { damping: 8 })
+      );
+
+      // Partículas
+      setParticulas(Array.from({ length: 10 }, (_, i) => ({
+        id: `p${Date.now()}${i}`,
+        x: W / 2 - 5,
+        y: 160,
+        color: ['#FFE566','#4ECDC4','#FF6B6B','#9B5DE5','#F77F00'][i % 5],
+        index: i,
+      })));
+      setTimeout(() => setParticulas([]), 800);
+
+      setPuntos(p => p + 10);
+      const nuevasEncontradas = encontradas + 1;
+      setEncontradas(nuevasEncontradas);
+
+      // Si encontró todas las letras → juego terminado
+      if (nuevasEncontradas >= ALEF_BET.length) {
+        setTimeout(() => finalizarJuego(puntos + 10), 600);
+        return;
+      }
+
+      // Avanzar a la siguiente letra objetivo
+      setTimeout(() => {
+        setIdxObjetivo(prev => prev + 1);
+        escalaObjetivo.value = withSequence(
+          withSpring(1.2, { damping: 4 }),
+          withSpring(1.0, { damping: 8 })
+        );
+      }, 400);
+
+    } else {
+      // ERROR
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      setErrores(e => e + 1);
+
+      // Flash rojo momentáneo en la celda tocada
+      setEstadosCeldas(prev => ({ ...prev, [item.id]: 'incorrecto' }));
+      setTimeout(() => {
+        setEstadosCeldas(prev => ({ ...prev, [item.id]: 'normal' }));
+      }, 500);
+    }
+  }, [juegoActivo, estadosCeldas, letraObjetivo, encontradas, puntos]);
+
+  // ── Finalizar juego ───────────────────────────────────────────
+  const finalizarJuego = useCallback(async (puntosFinales) => {
+    setJuegoActivo(false);
+    const pts = puntosFinales ?? puntos;
+    const estrellas = errores <= 5 ? 3 : errores <= 15 ? 2 : 1;
+    await actualizarNivel('nivel1', { puntos: pts, estrellas, completado: true });
+    Alert.alert(
+      '¡Completaste el Alef-Bet! 🎉',
+      `Encontraste las 22 letras\nPuntos: ${pts}\nErrores: ${errores}`,
+      [
+        { text: '¡Otra vez!', onPress: iniciarJuego },
+        { text: 'Volver',     onPress: () => navigation.goBack() },
+      ]
+    );
+  }, [puntos, errores, navigation]);
+
+  // ── Texto del objetivo según modo ─────────────────────────────
+  const textoObjetivo =
+    modo === MODOS.FONETICA ? letraObjetivo?.fonetica :
+    modo === MODOS.ESPANOL  ? letraObjetivo?.nombre   :
+    letraObjetivo?.letra;
+
+  const esLatinObjetivo = modo !== MODOS.HEBREO;
+
+  return (
     <View style={styles.contenedor}>
-      <View style={{height:SB_H}}/>
+      <View style={{ height: SB_H }} />
+
+      {/* HUD */}
       <View style={styles.hud}>
-        <TouchableOpacity onPress={()=>navigation.goBack()} style={styles.btnVolver}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.btnVolver}>
           <Text style={styles.btnVolverTexto}>← Volver</Text>
         </TouchableOpacity>
-        <View style={styles.vidasRow}>{[1,2,3].map(i=><Text key={i} style={{fontSize:24,opacity:i<=vidas?1:0.25}}>❤️</Text>)}</View>
+        <View style={styles.progresoWrap}>
+          <Text style={styles.progresoTexto}>{encontradas}/{ALEF_BET.length} letras</Text>
+        </View>
         <View style={styles.puntosWrap}>
           <Text style={styles.puntosLabel}>PTS</Text>
           <Text style={styles.puntosValor}>{puntos}</Text>
         </View>
       </View>
 
-      {/* Barra de idioma */}
-      <BarraIdioma modo={modo} onFonetica={toggleFonetica} onToggle={toggleTraduccion} labelToggle={labelToggle}/>
+      {/* Barra idioma */}
+      <BarraIdioma modo={modo} onFonetica={toggleFonetica} onToggle={toggleTraduccion} />
 
-      <View style={styles.objetivoWrap}>
-        <Text style={styles.objetivoLabel}>¡Buscá esta letra!</Text>
-        {letraActual&&(
-          <Animated.View style={estiloLetra}>
-            <Text style={modo==='fonetica'||modo==='espanol'?styles.letraObjetivoLatin:styles.letraObjetivo}>
-              {textoObjetivo}
-            </Text>
-            {modo==='hebreo' && <Text style={styles.letraNombre}>{letraActual.nombre} — {letraActual.fonetica}</Text>}
-          </Animated.View>
-        )}
-      </View>
+      {juegoActivo ? (
+        <>
+          {/* Letra objetivo */}
+          <View style={styles.objetivoWrap}>
+            <Text style={styles.objetivoLabel}>¡Encontrá esta letra!</Text>
+            <Animated.View style={[styles.objetivoCard, estiloObjetivo]}>
+              <Text style={esLatinObjetivo ? styles.objetivoLetraLatin : styles.objetivoLetra}>
+                {textoObjetivo}
+              </Text>
+              {modo === MODOS.HEBREO && (
+                <Text style={styles.objetivoNombre}>
+                  {letraObjetivo?.nombre} — {letraObjetivo?.fonetica}
+                </Text>
+              )}
+            </Animated.View>
+            {/* Barra de progreso */}
+            <View style={styles.barraProgreso}>
+              <View style={[styles.barraProgresoFill, { width: `${(encontradas / ALEF_BET.length) * 100}%` }]} />
+            </View>
+          </View>
 
-      <View style={styles.areaJuego} pointerEvents="box-none">
-        {burbujas.map(b=>(
-          <Burbuja key={b.id} letra={b.letra} fonetica={b.fonetica} color={b.color} posX={b.posX}
-            esCertera={b.esCertera} index={b.index} activa={juegoActivo} modo={modo}
-            onPresionar={(ok)=>manejarToque(ok,b.posX+44)}/>
-        ))}
-        {particulas.map(p=><Particula key={p.id} x={p.x} y={p.y} color={p.color} index={p.index}/>)}
-        <View style={styles.feedbackWrap} pointerEvents="none">
-          <FeedbackFloat texto={feedback.texto} color={feedback.color} visible={feedback.visible}/>
+          {/* Cuadrícula */}
+          <ScrollView contentContainerStyle={styles.cuadriculaWrap} showsVerticalScrollIndicator={false}>
+            <View style={styles.cuadricula}>
+              {cuadricula.map(item => (
+                <CeldaLetra
+                  key={item.id}
+                  item={item}
+                  estado={estadosCeldas[item.id] || 'normal'}
+                  onPress={manejarToque}
+                  modo={modo}
+                />
+              ))}
+            </View>
+          </ScrollView>
+
+          {/* Partículas */}
+          {particulas.map(p => (
+            <Particula key={p.id} x={p.x} y={p.y} color={p.color} index={p.index} />
+          ))}
+        </>
+      ) : (
+        // Pantalla de inicio
+        <View style={styles.pantallaInicio}>
+          <Text style={styles.inicioTitulo}>אָלֶף-בֵּית</Text>
+          <Text style={styles.inicioSubtitulo}>¡Encontrá todas las letras! 🔍</Text>
+          <Text style={styles.inicioDesc}>
+            Aparece una letra arriba y tenés que encontrarla en la cuadrícula de abajo.
+            ¡Las 22 letras del Alef-Bet te esperan!
+          </Text>
+          <TouchableOpacity style={styles.botonJugar} onPress={iniciarJuego}>
+            <Text style={styles.botonJugarTexto}>¡JUGAR! 🚀</Text>
+          </TouchableOpacity>
         </View>
-
-        {/* Botón reiniciar cuando las burbujas llegaron sin ser tocadas */}
-        {juegoActivo && burbujasLlegaron && (
-          <View style={styles.reiniciarWrap}>
-            <Text style={styles.reiniciarMensaje}>¡Las letras llegaron abajo! 😅</Text>
-            <TouchableOpacity style={styles.botonReiniciar} onPress={reiniciarRonda}>
-              <Text style={styles.botonReiniciarTexto}>🔄 Nueva ronda (-❤️)</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {!juegoActivo&&(
-          <View style={styles.pantallaInicio}>
-            <Text style={styles.inicioTitulo}>אָלֶף-בֵּית</Text>
-            <Text style={styles.inicioSubtitulo}>¡Atrapá las letras! 🎮</Text>
-            <Text style={styles.inicioDesc}>Mirá la letra de arriba y tocá la burbuja correcta antes de que llegue abajo</Text>
-            <TouchableOpacity style={styles.botonJugar} onPress={iniciarJuego}>
-              <Text style={styles.botonJugarTexto}>¡JUGAR! 🚀</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
+      )}
     </View>
   );
 }
 
-const styles=StyleSheet.create({
-  contenedor:{flex:1,backgroundColor:'#1a1060'},
-  hud:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:16,paddingVertical:12,backgroundColor:'rgba(0,0,0,0.35)'},
-  btnVolver:{padding:8},btnVolverTexto:{color:'rgba(255,255,255,0.8)',fontSize:16,fontWeight:'700'},
-  vidasRow:{flexDirection:'row',gap:4},
-  puntosWrap:{alignItems:'flex-end'},
-  puntosLabel:{color:'rgba(255,255,255,0.5)',fontSize:11,fontWeight:'800',letterSpacing:1},
-  puntosValor:{color:'#FFE566',fontSize:28,fontWeight:'900'},
-  objetivoWrap:{alignItems:'center',paddingVertical:14,backgroundColor:'rgba(0,0,0,0.2)'},
-  objetivoLabel:{color:'rgba(255,255,255,0.55)',fontSize:14,fontWeight:'700',letterSpacing:1,textTransform:'uppercase',marginBottom:4},
-  letraObjetivo:{color:'#FFE566',fontSize:80,fontWeight:'900',textAlign:'center',writingDirection:'rtl'},
-  letraObjetivoLatin:{color:'#FFE566',fontSize:52,fontWeight:'900',textAlign:'center'},
-  letraNombre:{color:'rgba(255,229,102,0.7)',fontSize:16,fontWeight:'700',textAlign:'center'},
-  areaJuego:{flex:1,position:'relative'},
-  burbuja:{position:'absolute',width:88,height:88,borderRadius:44,borderWidth:3,borderColor:'rgba(255,255,255,0.3)',justifyContent:'center',alignItems:'center',elevation:6},
-  burbujaTouch:{width:'100%',height:'100%',justifyContent:'center',alignItems:'center',borderRadius:44},
-  letraHebrea:{color:'#fff',fontSize:44,fontWeight:'900',writingDirection:'rtl'},
-  letraFonetica:{color:'#fff',fontSize:22,fontWeight:'900',textAlign:'center'},
-  feedbackWrap:{position:'absolute',top:H*0.28,left:0,right:0,alignItems:'center',zIndex:20},
-  feedbackTexto:{fontSize:26,fontWeight:'900'},
-  reiniciarWrap:{position:'absolute',top:0,left:0,right:0,bottom:0,justifyContent:'center',alignItems:'center',backgroundColor:'rgba(26,16,96,0.85)',zIndex:25,gap:16},
-  reiniciarMensaje:{color:'#FFE566',fontSize:20,fontWeight:'700',textAlign:'center'},
-  botonReiniciar:{backgroundColor:'#FF6B6B',paddingHorizontal:36,paddingVertical:14,borderRadius:24,elevation:8},
-  botonReiniciarTexto:{color:'#fff',fontSize:18,fontWeight:'900'},
-  pantallaInicio:{position:'absolute',top:0,left:0,right:0,bottom:0,justifyContent:'center',alignItems:'center',backgroundColor:'rgba(26,16,96,0.93)',zIndex:30,gap:16,paddingHorizontal:32},
-  inicioTitulo:{color:'#FFE566',fontSize:60,fontWeight:'900',writingDirection:'rtl'},
-  inicioSubtitulo:{color:'#fff',fontSize:22,fontWeight:'700',textAlign:'center'},
-  inicioDesc:{color:'rgba(255,255,255,0.6)',fontSize:15,textAlign:'center',lineHeight:22},
-  botonJugar:{backgroundColor:'#FFE566',paddingHorizontal:52,paddingVertical:18,borderRadius:32,marginTop:8,elevation:10},
-  botonJugarTexto:{color:'#1a1060',fontSize:26,fontWeight:'900',letterSpacing:1},
+// Tamaño de celda: 4 columnas que entran en la pantalla
+const CELDA_SIZE = Math.floor((W - 40) / 4) - 6;
+
+const styles = StyleSheet.create({
+  contenedor: { flex: 1, backgroundColor: '#1a1060' },
+  hud: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, backgroundColor: 'rgba(0,0,0,0.35)' },
+  btnVolver: { padding: 8 }, btnVolverTexto: { color: 'rgba(255,255,255,0.8)', fontSize: 16, fontWeight: '700' },
+  progresoWrap: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
+  progresoTexto: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  puntosWrap: { alignItems: 'flex-end' },
+  puntosLabel: { color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
+  puntosValor: { color: '#FFE566', fontSize: 28, fontWeight: '900' },
+
+  objetivoWrap: { alignItems: 'center', paddingVertical: 12, backgroundColor: 'rgba(0,0,0,0.2)', gap: 8 },
+  objetivoLabel: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+  objetivoCard: { backgroundColor: 'rgba(255,229,102,0.15)', borderRadius: 20, paddingHorizontal: 28, paddingVertical: 10, alignItems: 'center', borderWidth: 2, borderColor: 'rgba(255,229,102,0.4)' },
+  objetivoLetra: { color: '#FFE566', fontSize: 72, fontWeight: '900', writingDirection: 'rtl' },
+  objetivoLetraLatin: { color: '#FFE566', fontSize: 44, fontWeight: '900', textAlign: 'center' },
+  objetivoNombre: { color: 'rgba(255,229,102,0.7)', fontSize: 15, fontWeight: '700', textAlign: 'center', marginTop: 2 },
+  barraProgreso: { width: W * 0.8, height: 6, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 3, overflow: 'hidden' },
+  barraProgresoFill: { height: '100%', backgroundColor: '#4ECDC4', borderRadius: 3 },
+
+  cuadriculaWrap: { paddingHorizontal: 12, paddingVertical: 12 },
+  cuadricula: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
+
+  celda: {
+    width: CELDA_SIZE, height: CELDA_SIZE,
+    borderRadius: 14, borderWidth: 2,
+    justifyContent: 'center', alignItems: 'center',
+  },
+  celdaTouch: { width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center', borderRadius: 14 },
+  celdaLetra: { color: '#fff', fontSize: 32, fontWeight: '900', writingDirection: 'rtl', textAlign: 'center' },
+  celdaLetraLatin: { color: '#fff', fontSize: 14, fontWeight: '900', textAlign: 'center' },
+  celdaCheck: { position: 'absolute', top: 2, right: 4, fontSize: 12, color: '#fff' },
+
+  pantallaInicio: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 16, paddingHorizontal: 32 },
+  inicioTitulo: { color: '#FFE566', fontSize: 60, fontWeight: '900', writingDirection: 'rtl' },
+  inicioSubtitulo: { color: '#fff', fontSize: 22, fontWeight: '700', textAlign: 'center' },
+  inicioDesc: { color: 'rgba(255,255,255,0.6)', fontSize: 15, textAlign: 'center', lineHeight: 22 },
+  botonJugar: { backgroundColor: '#FFE566', paddingHorizontal: 52, paddingVertical: 18, borderRadius: 32, marginTop: 8, elevation: 10 },
+  botonJugarTexto: { color: '#1a1060', fontSize: 26, fontWeight: '900', letterSpacing: 1 },
 });
